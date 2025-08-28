@@ -12,7 +12,7 @@ export async function fetchFromApi<T>(
   try {
     // Ensure no double slashes
     const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
-    const apiUrl = `https://damaki.onrender.com/api/v1/${cleanEndpoint}`;
+  const apiUrl = `${process.env.VITE_API_URL}/api/v1/${cleanEndpoint}`;
 
     // Get token from localStorage
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
