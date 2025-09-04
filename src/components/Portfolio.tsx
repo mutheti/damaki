@@ -1,4 +1,4 @@
-import { ExternalLink, Github, Filter, X, Loader2 } from "lucide-react";
+import { ExternalLink, Github, Filter, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { fetchFromApi } from "@/utils/api";
 import { useToast } from "@/components/ui/use-toast";
+import { PortfolioSkeleton } from "@/components/ui/shimmer";
 
 export interface IProject {
   _id?: string;
@@ -67,6 +68,9 @@ export default function Portfolio() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
+  // Always treat as production environment
+  const isProduction = true;
+  
   // Filter projects based on selected category
   const filteredProjects = selectedCategory === 'All' 
     ? projects 
@@ -90,7 +94,8 @@ export default function Portfolio() {
           if (projectsData.length > 0) {
             setProjects(projectsData);
           } else {
-            // If no projects in the database, use fallback
+          // If no projects in the database, use fallback only in development
+          if (!isProduction) {
             setProjects(fallbackProjects);
             setError('No projects found in the database.');
             toast({
@@ -98,11 +103,17 @@ export default function Portfolio() {
               description: "Using sample project data. Please add projects through the admin panel.",
               variant: "destructive"
             });
+          } else {
+            // In production, show empty state instead of fallback
+            setProjects([]);
           }
+        } 
         } else {
-          // If API call fails, use fallback data
-          const errorMsg = response?.error || 'Failed to fetch projects';
-          console.error('API Error:', errorMsg);
+        // If API call fails, use fallback data only in development
+        const errorMsg = response?.error || 'Failed to fetch projects';
+        console.error('API Error:', errorMsg);
+        
+        if (!isProduction) {
           setProjects(fallbackProjects);
           setError('Failed to load projects from server.');
           toast({
@@ -110,10 +121,22 @@ export default function Portfolio() {
             description: "Using sample project data. Please check your connection and try again.",
             variant: "destructive"
           });
+        } else {
+          // In production, show empty state
+          setProjects([]);
+          setError('Unable to load projects at this time.');
         }
+      } 
       } catch (err) {
+      console.error('Fetch Error:', err);
+      
+      if (!isProduction) {
         setError('Error connecting to the server. Using fallback data.');
-        console.error('Fetch Error:', err);
+        setProjects(fallbackProjects);
+      } else {
+        setError('Unable to connect to the server.');
+        setProjects([]);
+      }
       } finally {
         setIsLoading(false);
       }
@@ -123,19 +146,11 @@ export default function Portfolio() {
   }, []);
 
   if (isLoading) {
-    return (
-      <section id="portfolio" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex flex-col items-center justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-gray-600">Loading projects...</p>
-          </div>
-        </div>
-      </section>
-    );
+    return <PortfolioSkeleton />;
   }
 
-  if (error) {
+  // Handle error state - only show error message in development
+  if (error && !isProduction && projects.length === 0) {
     return (
       <section id="portfolio" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -268,6 +283,22 @@ export default function Portfolio() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // In production, if there are no projects and there's an error, show empty state
+  if (projects.length === 0) {
+    return (
+      <section id="portfolio" className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
+            <p className="text-gray-600 mb-8">
+              We're currently updating our portfolio. Please check back soon to see our latest work.
+            </p>
           </div>
         </div>
       </section>

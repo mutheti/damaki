@@ -18,12 +18,25 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .animate-slide {
   animation: slide 20s linear infinite;
 }
 
 .animate-slide:hover {
   animation-play-state: paused;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
 }
 
 /* Damaki Solutions Design System - Modern tech company theme */

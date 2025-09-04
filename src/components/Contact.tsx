@@ -70,7 +70,8 @@ export default function Contact() {
     setIsSubmitting(true);
     
     try {
-      const response = await fetch('http://localhost:4000/api/v1/contact', {
+      const apiUrl = (import.meta as any).env.VITE_API_URL || 'https://damaki-backend.onrender.com';
+      const response = await fetch(`${apiUrl}/api/v1/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

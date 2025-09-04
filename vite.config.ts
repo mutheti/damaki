@@ -9,7 +9,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
 
-  const config = {
+  return {
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, 'index.html'),
+        },
+      },
+    },
     define: {
       // Expose environment variables to your client-side code
       'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL),
@@ -28,6 +35,9 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
+    preview: {
+      port: 3000,
+    },
     plugins: [
       react(),
       isDev && componentTagger()
@@ -38,6 +48,4 @@ export default defineConfig(({ mode }) => {
       }
     }
   };
-
-  return config;
 });

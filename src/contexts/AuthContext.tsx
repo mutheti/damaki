@@ -18,18 +18,19 @@ export interface User {
 
 interface LoginResponse {
   success: boolean;
-  token: string;
-  refreshToken: string;
-  data: {
+  token?: string;
+  refreshToken?: string;
+  data?: {
     user: User;
   };
+  message?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ user: User; refreshToken: string }>;
   logout: () => void;
   checkAuth: () => Promise<boolean>;
   refreshToken: () => Promise<boolean>;
@@ -141,7 +142,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       
       // Navigate to login page
-      navigate('/admin/login');
+      navigate('/login');
       
       toast({
         title: 'Logged out',
