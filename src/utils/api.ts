@@ -12,14 +12,15 @@ export async function fetchFromApi<T>(
   try {
     // Ensure no double slashes
     const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
-    const apiUrl = `http://localhost:4000/api/v1/${cleanEndpoint}`;
+    const baseUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:4000';
+    const apiUrl = `${baseUrl}/api/v1/${cleanEndpoint}`;
 
     // Get token from localStorage
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
     // Debug logs
-    console.log("🔗 API URL:", apiUrl);
-    console.log("🔑 Token from localStorage:", token);
+    //console.log("🔗 API URL:", apiUrl);
+    //console.log("🔑 Token from localStorage:", token);
 
     // Prepare headers
     const headers = new Headers({
@@ -31,7 +32,7 @@ export async function fetchFromApi<T>(
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    console.log("📦 Request Headers:", Object.fromEntries(headers.entries()));
+   // console.log("📦 Request Headers:", Object.fromEntries(headers.entries()));
 
     const response = await fetch(apiUrl, {
       ...options,
@@ -58,7 +59,7 @@ export async function fetchFromApi<T>(
     }
 
     const data = await response.json();
-    console.log("✅ API Response Data:", data);
+   // console.log("✅ API Response Data:", data);
 
     return { success: true, data: data as T, message: 'Success' };
 
